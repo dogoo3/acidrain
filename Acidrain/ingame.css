@@ -1,0 +1,22 @@
+canvas
+{
+    background: #eee;
+    display: block;
+    margin: auto;
+}
+*{
+    box-sizing: border-box;
+}
+
+#ingameCanvas
+{
+    box-shadow: 0 0 10px 2px rgba(100,100,100);
+    margin-top: 30px;
+}
+
+#inputword
+{
+    font-size: 30px;
+    margin-top: 30px;
+    text-align: center;
+}

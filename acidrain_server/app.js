@@ -35,7 +35,7 @@ export const socket = new Server(server, {
 });
 
 socket.on("connection", socket => {
-    if(index > -1 && _flag) // 페이지 이동시 소켓ID를 재할당하기위해 Flag도 조건에 포함
+    if(_flag) // 페이지 이동시 소켓ID를 재할당하기위해 Flag도 조건에 포함
     {
         _flag = false; 
         console.log("재할당");

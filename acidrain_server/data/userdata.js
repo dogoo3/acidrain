@@ -22,16 +22,11 @@ function Matching(p_username, p_level) {
             p_level + 50 > waitingList[i].level)
         {
             //app.socket.emit("gamestart", "Message");
-            console.log(`A : ${socketList[socketList.length - 1]}`);
-            console.log(`B : ${socketList[i]}`);
             app.socket.to(socketList[i]).emit("gamestart", "Message");
             app.socket.to(socketList[socketList.length-1]).emit("gamestart", "Message");
-            console.log(`BEFORE : ${socketList.length}`);
             waitingList.splice(i, 1); // 해당하는 유저의 정보 삭제
             socketList.splice(i, 1); // 해당하는 유저의 소켓ID 삭제
             socketList.splice(socketList.length-1, 1);
-            console.log(`${i}, ${socketList.length-1}`);
-            console.log(`W : ${waitingList.length}, S : ${socketList.length}`);
             return true;
         }
     }

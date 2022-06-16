@@ -25,8 +25,8 @@ app.use((error, req, res, next) => {
     res.sendStatus(500);
 })
 
-let index = -1;
-
+export let index = -1;
+let _flag = false;
 const server = app.listen(7000);
 export const socket = new Server(server, {
     cors: {
@@ -35,8 +35,9 @@ export const socket = new Server(server, {
 });
 
 socket.on("connection", socket => {
-    if(index > -1)
+    if(index > -1 && _flag) // 페이지 이동시 소켓ID를 재할당하기위해 Flag도 조건에 포함
     {
+        _flag = false; 
         console.log("재할당");
         userdata.socketList[index] = socket.id;
     }
@@ -51,6 +52,8 @@ socket.on("connection", socket => {
             {
                 console.log("삭제");
                 index = i;
+                _flag = true; // 페이지 이동시 재할당을 위한 Flag
+                break;
             }
         }
     });

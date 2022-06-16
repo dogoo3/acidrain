@@ -1,0 +1,22 @@
+/* Input의 type이 number일 때 오른쪽 화살표 제거 */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button{
+    -webkit-appearance: none;
+}
+
+.inputlevel
+{
+    font-size: 30px;
+    text-align: center;
+}
+.access
+{
+    background-color: aquamarine;
+    width:200px;
+    height: 50px;
+    font-size:30px;
+}
+div
+{
+    margin-bottom: 30px;
+}

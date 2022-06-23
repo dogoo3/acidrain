@@ -1,41 +1,30 @@
 import React, { useEffect, useRef, useState } from 'react';
 import "../css/Ingame.css"
 
-// const test_words = [
-//     "갈무리", "고등어", "나모쥭", "이리듐", "카드뮴", "슭곰발", "해질녘", "돋을별", "사이다", "사기꾼",
-//     "무릎팍", "도토리", "강아지", "고양이", "나들목", "로터리", "교차로", "신호등", "공매도", "장마감",
-//     "상한가", "하한가", "코스피", "코스닥", "공장장", "압구정", "땅보탬", "바깥말", "오리온", "로스웰",
-//     "사미자", "나훈아", "김경호", "갤럭시", "아이폰", "코이즈", "마우스", "키보드", "모니터", "신도림",
-//     "핸드폰", "오지랖", "고사리", "고스트", "고추장", "곰탱이", "구렁이", "지렁이", "수술실", "공격력",
-//     "방어력", "네이비", "그레이", "귀공자", "글로리", "경마장", "꽃바람", "꾸띠르", "꿀단지", "꼬맹이",
-//     "까마귀", "나이키", "논스톱", "늴리리", "닌텐도", "웨하스", "포카칩", "달변가", "댄싱퀸", "담채화",
-//     "덴티티", "데자뷰", "들레꽃", "딸바보", "레퀴엠", "록펠러", "루시드", "마틸다", "마카오", "메소드",
-//     "무지개", "미란다", "물수건", "밀라노", "빠삐용", "삐에로", "뽀로로", "뿜빠이", "블랙잭", "바루스",
-//     "빌리진", "사령관", "상하이", "삼겹살", "쌍꺼풀", "세라핌", "소나무", "손세탁", "스텔라", "쓰레기",
-//     "싸인회", "아리수", "애니멀", "엽록소", "옵저버", "와일드", "오스카", "유리창", "윈도우", "리눅스",
-//     "유닉스", "은메달", "내린천", "인디언", "인물값", "인셉션", "인터넷", "일관성", "이벤트", "의형제"
-// ];
-
 const Ingame = ({ acidlogic, socketIO }) => {
-    const [words, updateWords] = useState([]);
-    const canvas = useRef();
+    const [words, updateWords] = useState([]); // 단어 갱신시 hook을 통해 리렌더링
+    const canvas = useRef(); // 캔버스의 레퍼런스?를 따오는 변수인 듯
 
     let myscore = 0, otherscore = 0;
     let ctx = null;
 
-    if(!acidlogic.GetGameStartFlag())
+    // 소켓 ID는 서버에 한번만 주면 되기 때문에 logic.js에 플래그 변수를 만듬
+    if(!acidlogic.GetGameStartFlag())  
     {
         socketIO.EMIT("ingame"); // 페이지 접속 시 소켓 ID를 서버로 전송
-        acidlogic.SetGameStart(true);
+        acidlogic.SetGameStart(true); // 서버에 ID를 주면 플래그를 걸음
     }
     
     socketIO.ON("setwords", (p_words) => { // 단어 리스트를 받았을 때
-        console.log(p_words[0]);
-        updateWords(p_words);
+        console.log(p_words[0]); // 영상에 있는 디버그로그. 지워도됨
+        updateWords(p_words); // 서버에서 받아온 단어리스트를 hook으로 넘김
     })
     const SendWord = (event) => { // 엔터 키를 눌러서 접속하는 함수
         if (event.key === "Enter")
         {
+            // 단어입력창에 작성된 단어를 서버로 보내줌.
+            // 서버에서 잘 받고, 처리해 주면 됨.
+            // 공백 처리, 엔터 입력 시 삭제 처리를 해줘야 함
             socketIO.EMIT("sendword", document.getElementById("wordinputfield").value);
         }
     };
@@ -45,15 +34,16 @@ const Ingame = ({ acidlogic, socketIO }) => {
 
         for (let i = 0; i < 120; i++) {
             if (i % 12 === 0) { // 한 줄에 12개씩 단어를 작성
-                x = 50;
-                y += 80;
+                x = 50; // 1열의 위치(좌표값)로 복귀
+                y += 80; // 1행 내려줌
             }
-            ctx.fillText(words[i], x + 25, y + -50);
-            x += 150;
+            ctx.fillText(words[i], x + 25, y + -50); // 글씨를 쓴 뒤
+            x += 150; // 1열 옮겨줌
         }
     }
 
     useEffect(() => {
+        // 텍스트 작성을 위한 사전작업임
         const canvasEle = canvas.current;
         canvasEle.width = canvasEle.clientWidth;
         canvasEle.height = canvasEle.clientHeight;
@@ -66,7 +56,7 @@ const Ingame = ({ acidlogic, socketIO }) => {
     return (
         <div>
             <canvas ref={canvas} id="ingamecanvas" width="1800" height="800"></canvas>
-            <div style={{display:"flex", justifyContent:"center"}}>
+            <div style={{display:"flex", justifyContent:"center"}}> 
                 <h1 id="myscore">{myscore}</h1>
                 <input type="text" id="wordinputfield" onKeyPress={SendWord} />
                 <h1 id="otherscore">{otherscore}</h1>            

@@ -34,8 +34,9 @@ export const socket = new Server(server, {
     },
 });
 
-function AAA()
+function MakeRoom()
 {
+    // 방을 만든 후
     userdata.room.push({
         id_p1: userdata.ingameList[0], 
         id_p2: userdata.ingameList[1],  
@@ -44,11 +45,13 @@ function AAA()
         timer: 120,
         words: userdata.GetWords(),
     });
+    // 소켓 ID를 찍어본 목적은 페이지에서 보내는 ID와 저장된 ID가 같은지 확인하기 위함
     console.log(`room id 1 : ${userdata.room[0].id_p1}`);
     console.log(`room id 2 : ${userdata.room[0].id_p2}`);
+    // 각 클라이언트로 랜덤으로 뽑은 단어를 보낸다
     socket.to(userdata.room[0].id_p1).emit("setwords", userdata.room[0].words);
     socket.to(userdata.room[0].id_p2).emit("setwords", userdata.room[0].words);
-    // socket.emit("setwords", userdata.room[0].words);
+    // 인게임 대기열을 초기화한다.
     userdata.ingameList.length = 0;
 }
 
@@ -75,20 +78,13 @@ socket.on("connection", socket => {
     });
 
     socket.on("ingame", () => {
-        userdata.ingameList.push(socket.id);
+        // 인게임 리스트에 2명의 유저가 들어오면(페이지가 넘어가면서 emit되기때문에 거의 동시에 접속함)
+        userdata.ingameList.push(socket.id); 
         if(userdata.ingameList.length >= 2)
-            AAA();
-        for(let i=0;i<userdata.ingameList.length;i++)
-        {
-            console.log(`${i + 1} : ${userdata.ingameList[i]}`);
-        }
-        if (userdata.ingameList.length >= 2) // 2명 이상의 유저가 매칭될 경우
-        {
-            
-        }
+            MakeRoom(); // 방을 개설한다
     });
 
     socket.on("sendword", (word) => {
-        console.log(`socket ID : ${socket.id}`);
+        console.log(`GET WORD : ${word}`);
     })
 });

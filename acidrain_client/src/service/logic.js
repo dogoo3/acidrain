@@ -1,6 +1,7 @@
 export default class AcidService {
     constructor(http) {
         this.http = http;
+        this.gamestart = false;
         console.log(this.http);
     }
 
@@ -10,5 +11,15 @@ export default class AcidService {
             method: "PUT",
             body:JSON.stringify({nickname:p_nickname, level:p_level})
         });
+    }
+
+    SetGameStart(_flag)
+    {
+        this.gamestart = _flag;
+    }
+
+    GetGameStartFlag()
+    {
+        return this.gamestart;
     }
 }

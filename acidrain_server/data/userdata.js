@@ -3,6 +3,8 @@ import * as word from "./worddata.js";
 
 let waitingList = []; // 유저의 ID와 타수를 저장 
 export let socketList = []; // 유저의 소켓 ID를 저장
+export let ingameList = []; // 인게임 URL로 들어가는 유저의 소켓ID를 저장
+export let room = []; // 게임 관리를 위한 방을 관리
 
 export function AddPerson(username, level) {
     const _isMatched = Matching(username, level);
@@ -20,12 +22,12 @@ function Matching(p_username, p_level) {
         if (p_level - 50 < waitingList[i].level &&
             p_level + 50 > waitingList[i].level)
         {
-            const worddata = GetWords();
-            for(let i=0;i<worddata.length;i++)
-                console.log(`${i} : ${worddata[i]}`);
+            // const worddata = GetWords();
+            // for(let i=0;i<worddata.length;i++)
+            //     console.log(`${i} : ${worddata[i]}`);
             
-            app.socket.to(socketList[i]).emit("gamestart", "Message");
-            app.socket.to(socketList[socketList.length-1]).emit("gamestart", "Message");
+            app.socket.to(socketList[i]).emit("gamestart");
+            app.socket.to(socketList[socketList.length-1]).emit("gamestart");
             waitingList.splice(i, 1); // 해당하는 유저의 정보 삭제
             socketList.splice(i, 1); // 해당하는 유저의 소켓ID 삭제
             socketList.splice(socketList.length-1, 1); // 합류한 유저의 소켓ID 삭제
@@ -37,7 +39,7 @@ function Matching(p_username, p_level) {
     return false;
 }
 
-function GetWords()
+export function GetWords()
 {
     let words = [], index = [], count = 0, _flag = false;
 

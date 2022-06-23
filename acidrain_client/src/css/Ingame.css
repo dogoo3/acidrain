@@ -19,3 +19,13 @@ canvas
     margin-top: 30px;
     text-align: center;
 }
+
+#myscore
+{
+    margin-right: 200px;
+}
+
+#otherscore
+{
+    margin-left: 200px;
+}

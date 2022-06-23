@@ -11,7 +11,7 @@ function App({acidlogic, socketIO}) {
       <Routes>
         <Route path='/' element={<InputMyLevel acidlogic={acidlogic} socketIO={socketIO}/>} />
         <Route path='/waiting' element={<Waiting acidlogic={acidlogic} socketIO={socketIO}/> } />
-        <Route path='/ingame' element={<Ingame />} />
+        <Route path='/ingame' element={<Ingame acidlogic={acidlogic} socketIO={socketIO}/>} />
       </Routes>
       </BrowserRouter>
     </div>

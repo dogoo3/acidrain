@@ -85,6 +85,7 @@ socket.on("connection", socket => {
     });
 
     socket.on("sendword", (word) => {
+        let isFind  =false;
         console.log(`GET WORD : ${word}`);
     
         console.log(socket.id)
@@ -94,27 +95,44 @@ socket.on("connection", socket => {
                 console.log('방찾음');
                 for(let j=0; j<userdata.room[i].words.length;j++){  //단어 찾기
                     if(userdata.room[i].words[j]==word){
+
+                        if(socket.id==userdata.room[i].id_p1){  //p1이 단어를 입력했을 때
+                            console.log('1');
+                            userdata.room[i].score_p1++;
+                            socket.emit("updatemyscore", userdata.room[i].score_p1) //p1의 변경된 점수를 '나'의 점수로 업데이트
+                            
+                            socket.to(userdata.room[i].id_p2).emit("updateotherscore", userdata.room[i].score_p1);  //p1의 변경된 점수를 '상대'의 점수로 업데이트
+
+                        }
+                        if(socket.id==userdata.room[i].id_p2){  //p2가 단어를 입력했을 때
+                            console.log('2');
+                            userdata.room[i].score_p2++;
+                            socket.emit("updatemyscore", userdata.room[i].score_p2) //p2의 변경된 점수를 '나'의 점수로 업데이트
+                            
+                            socket.to(userdata.room[i].id_p1).emit("updateotherscore", userdata.room[i].score_p2);  //p2의 변경된 점수를 '상대'의 점수로 업데이트
+                        }
+                        
+
+
+
                         console.log('단어찾음');
                         userdata.room[i].words[j]='';
                         console.log(userdata.room[i].words)
+                        socket.emit("increasescore");
                         //송신한 클라의 상대에 단어 업데이트
-                        socket.to(userdata.room[i].id_p1).emit("setwords", userdata.room[0].words);
-                        socket.to(userdata.room[i].id_p2).emit("setwords", userdata.room[0].words);
+                        
+                        socket.to(userdata.room[i].id_p1).emit("setwords", userdata.room[i].words);
+                        socket.to(userdata.room[i].id_p2).emit("setwords", userdata.room[i].words);
                         
                         socket.emit("setwords", userdata.room[i].words);    //송신한 클라에 단어 업데이트
-
+                        isFind=true;
                         break;
                     }
                 }
-                break;
+
             }
         }
 
 
-
-        //단어가 단어 리스트에 있는지 확인
-        //있으면 지우기 true
-        //해당 아이디 확인
-        
     })
 });

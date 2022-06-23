@@ -46,11 +46,11 @@ function MakeRoom()
         words: userdata.GetWords(),
     });
     // 소켓 ID를 찍어본 목적은 페이지에서 보내는 ID와 저장된 ID가 같은지 확인하기 위함
-    console.log(`room id 1 : ${userdata.room[0].id_p1}`);
-    console.log(`room id 2 : ${userdata.room[0].id_p2}`);
+    console.log(`room id 1 : ${userdata.room[userdata.room.length-1].id_p1}`);
+    console.log(`room id 2 : ${userdata.room[userdata.room.length-1].id_p2}`);
     // 각 클라이언트로 랜덤으로 뽑은 단어를 보낸다
-    socket.to(userdata.room[0].id_p1).emit("setwords", userdata.room[0].words);
-    socket.to(userdata.room[0].id_p2).emit("setwords", userdata.room[0].words);
+    socket.to(userdata.room[userdata.room.length-1].id_p1).emit("setwords", userdata.room[userdata.room.length-1].words);
+    socket.to(userdata.room[userdata.room.length-1].id_p2).emit("setwords", userdata.room[userdata.room.length-1].words);
     // 인게임 대기열을 초기화한다.
     userdata.ingameList.length = 0;
 }

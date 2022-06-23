@@ -86,5 +86,35 @@ socket.on("connection", socket => {
 
     socket.on("sendword", (word) => {
         console.log(`GET WORD : ${word}`);
+    
+        console.log(socket.id)
+        for(let i =0;i<userdata.room.length;i++){   //방 찾기
+            if(socket.id==userdata.room[i].id_p1 ||socket.id==userdata.room[i].id_p2){
+
+                console.log('방찾음');
+                for(let j=0; j<userdata.room[i].words.length;j++){  //단어 찾기
+                    if(userdata.room[i].words[j]==word){
+                        console.log('단어찾음');
+                        userdata.room[i].words[j]='';
+                        console.log(userdata.room[i].words)
+                        //송신한 클라의 상대에 단어 업데이트
+                        socket.to(userdata.room[i].id_p1).emit("setwords", userdata.room[0].words);
+                        socket.to(userdata.room[i].id_p2).emit("setwords", userdata.room[0].words);
+                        
+                        socket.emit("setwords", userdata.room[i].words);    //송신한 클라에 단어 업데이트
+
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+
+
+        //단어가 단어 리스트에 있는지 확인
+        //있으면 지우기 true
+        //해당 아이디 확인
+        
     })
 });

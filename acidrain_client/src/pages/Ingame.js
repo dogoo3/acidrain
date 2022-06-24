@@ -1,11 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
+//import { socket } from '../../../acidrain_server/app';    //갑자기 이부분 에러난다길래 주석처리함
 import "../css/Ingame.css"
-let myscore = 0, otherscore = 0;    
+let myscore = 0, otherscore = 0;   
+
 
 
 const Ingame = ({ acidlogic, socketIO }) => {
     const [words, updateWords] = useState([]); // 단어 갱신시 hook을 통해 리렌더링
     const canvas = useRef(); // 캔버스의 레퍼런스?를 따오는 변수인 듯
+
+    const [timer, updatetimer] = useState(120);
 
     
     let ctx = null;
@@ -32,6 +36,13 @@ const Ingame = ({ acidlogic, socketIO }) => {
         console.log('gotomain')
         // 나중에는 승리/패배 팝업창을 띄우고, 버튼으로 '/'으로 이동할 수 있게 구현 필요
         window.location.href = "/";
+    })
+
+    socketIO.ON("timer", (time) => { 
+        console.log('받아온 시간'+timer);
+        
+        updatetimer(time);
+        
     })
 
     socketIO.ON("updateotherscore", (p_score) => { // 변경된 상대의 점수를 받았을 때
@@ -88,11 +99,12 @@ const Ingame = ({ acidlogic, socketIO }) => {
         writeWords();
     });
 
-
+    console.log('현재 시간'+timer);
     return (
         <div>
             <canvas ref={canvas} id="ingamecanvas" width="1800" height="700"></canvas>
-            <h1>남은 시간 : Timer</h1>
+            <h1>남은 시간 : </h1>
+            <h1 id="timer">{timer}</h1>
             <div style={{display:"flex", justifyContent:"center"}}> 
                 <h1 id="label_myscore">My Score : </h1>
                 <h1 id="myscore">{myscore}</h1>

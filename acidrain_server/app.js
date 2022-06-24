@@ -53,6 +53,53 @@ function MakeRoom()
     socket.to(userdata.room[userdata.room.length-1].id_p2).emit("setwords", userdata.room[userdata.room.length-1].words);
     // 인게임 대기열을 초기화한다.
     userdata.ingameList.length = 0;
+
+    
+    RoomTimer(userdata.room[userdata.room.length-1].id_p1,userdata.room[userdata.room.length-1].id_p2,userdata.room[userdata.room.length-1].timer)
+    /*
+    while(userdata.room[userdata.room.length-1].timer>=0){
+        //setTimeout(RoomTimer(userdata.room[userdata.room.length-1].id_p1,userdata.room[userdata.room.length-1].id_p2,userdata.room[userdata.room.length-1].timer), 1000);
+        setTimeout(() =>{
+            console.log(timer)
+            socket.to(p1_id).emit("timer", timer);
+            socket.to(p2_id).emit("timer", timer);
+            timer--;
+        }
+
+        )
+        userdata.room[userdata.room.length-1].timer--;
+    }
+    */
+    
+
+}
+
+function RoomTimer(p1_id,p2_id,timer){
+    if(timer>0){
+        setTimeout(function(){
+            timer--;
+            console.log(timer);
+            socket.to(p1_id).emit("timer", timer);
+            socket.to(p2_id).emit("timer", timer);
+            RoomTimer(p1_id,p2_id,timer);
+        },1000)
+    }
+
+    
+    
+    /*
+    while(timer>=0){
+        setTimeout(() =>{
+            console.log(timer)
+            socket.to(p1_id).emit("timer", timer);
+            socket.to(p2_id).emit("timer", timer);
+            timer--;
+
+        },1000);
+
+    }
+    */
+    
 }
 
 socket.on("connection", socket => {
@@ -83,6 +130,17 @@ socket.on("connection", socket => {
         if(userdata.ingameList.length >= 2)
             MakeRoom(); // 방을 개설한다
     });
+
+    socket.on('a',()=>{
+        for(let i =0;i<userdata.room.length;i++){
+            if(socket.id==userdata.room[i].id_p1 || socket.id==userdata.room[i].id_p2){
+                socket.to(userdata.room[i].id_p1).emit("gotomain");
+                socket.to(userdata.room[i].id_p2).emit("gotomain");
+        
+                socket.emit("gotomain");
+            }
+        }
+    })
 
     socket.on("sendword", (word) => {
         console.log(`GET WORD : ${word}`);

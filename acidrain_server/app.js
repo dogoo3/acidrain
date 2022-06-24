@@ -85,17 +85,15 @@ socket.on("connection", socket => {
     });
 
     socket.on("sendword", (word) => {
-        let isFind  =false;
         console.log(`GET WORD : ${word}`);
     
         console.log(socket.id)
         for(let i =0;i<userdata.room.length;i++){   //방 찾기
-            if(socket.id==userdata.room[i].id_p1 ||socket.id==userdata.room[i].id_p2){
+            if(socket.id==userdata.room[i].id_p1 || socket.id==userdata.room[i].id_p2){
 
                 console.log('방찾음');
                 for(let j=0; j<userdata.room[i].words.length;j++){  //단어 찾기
                     if(userdata.room[i].words[j]==word){
-
                         if(socket.id==userdata.room[i].id_p1){  //p1이 단어를 입력했을 때
                             console.log('1');
                             userdata.room[i].score_p1++;
@@ -103,6 +101,10 @@ socket.on("connection", socket => {
                             
                             socket.to(userdata.room[i].id_p2).emit("updateotherscore", userdata.room[i].score_p1);  //p1의 변경된 점수를 '상대'의 점수로 업데이트
 
+                            // 단어 업데이트
+                            userdata.room[i].words[j]='';
+                            socket.emit("setwords", userdata.room[i].words);    //송신한 클라에 단어 업데이트
+                            socket.to(userdata.room[i].id_p2).emit("setwords", userdata.room[i].words);
                         }
                         if(socket.id==userdata.room[i].id_p2){  //p2가 단어를 입력했을 때
                             console.log('2');
@@ -110,29 +112,18 @@ socket.on("connection", socket => {
                             socket.emit("updatemyscore", userdata.room[i].score_p2) //p2의 변경된 점수를 '나'의 점수로 업데이트
                             
                             socket.to(userdata.room[i].id_p1).emit("updateotherscore", userdata.room[i].score_p2);  //p2의 변경된 점수를 '상대'의 점수로 업데이트
+                       
+                            // 단어 업데이트
+                            userdata.room[i].words[j]='';
+                            socket.emit("setwords", userdata.room[i].words);    //송신한 클라에 단어 업데이트
+                            socket.to(userdata.room[i].id_p1).emit("setwords", userdata.room[i].words);
                         }
-                        
-
-
-
                         console.log('단어찾음');
-                        userdata.room[i].words[j]='';
-                        console.log(userdata.room[i].words)
-                        socket.emit("increasescore");
-                        //송신한 클라의 상대에 단어 업데이트
-                        
-                        socket.to(userdata.room[i].id_p1).emit("setwords", userdata.room[i].words);
-                        socket.to(userdata.room[i].id_p2).emit("setwords", userdata.room[i].words);
-                        
-                        socket.emit("setwords", userdata.room[i].words);    //송신한 클라에 단어 업데이트
-                        isFind=true;
                         break;
                     }
                 }
 
             }
         }
-
-
     })
 });

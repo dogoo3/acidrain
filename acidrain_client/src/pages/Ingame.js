@@ -18,20 +18,18 @@ const Ingame = ({ acidlogic, socketIO }) => {
     }
     
     socketIO.ON("setwords", (p_words) => { // 단어 리스트를 받았을 때
-        console.log(p_words[0]); // 영상에 있는 디버그로그. 지워도됨
+        console.log("setwords");
         updateWords(p_words); // 서버에서 받아온 단어리스트를 hook으로 넘김
     })
 
     socketIO.ON("updatemyscore", (p_score) => { //변경된 나의 점수를 받았을 때
+        console.log("updatemyscore");
         myscore = p_score;
-        console.log(myscore+otherscore);
-        
-        
         //useEffect();
     })
     socketIO.ON("updateotherscore", (p_score) => { // 변경된 상대의 점수를 받았을 때
+        console.log("updateotherscore");
         otherscore=p_score;
-        console.log(myscore+otherscore);
         //useEffect();
     })
 
@@ -39,11 +37,22 @@ const Ingame = ({ acidlogic, socketIO }) => {
     const SendWord = (event) => { // 엔터 키를 눌러서 접속하는 함수
         if (event.key === "Enter")
         {
-            // 단어입력창에 작성된 단어를 서버로 보내줌.
-            // 서버에서 잘 받고, 처리해 주면 됨.
-            // 공백 처리, 엔터 입력 시 삭제 처리를 해줘야 함
-            socketIO.EMIT("sendword", document.getElementById("wordinputfield").value);
-            document.getElementById("wordinputfield").value=''; //단어 입력창 공백으로
+            let inputValue = document.getElementById("wordinputfield").value;
+
+            // 아무것도 입력하지 않으면 서버로 보내지 않는다
+            if (inputValue.length === 0) {
+                return;
+            }
+            for(let i=0;i<inputValue.length;i++)
+            {
+                if(inputValue[i] === ' ')
+                {
+                    document.getElementById("wordinputfield").value = ''; //단어 입력창 공백으로
+                    return;
+                }
+            }
+            socketIO.EMIT("sendword", inputValue);
+            document.getElementById("wordinputfield").value = ''; //단어 입력창 공백으로
         }
     };
 
@@ -53,9 +62,9 @@ const Ingame = ({ acidlogic, socketIO }) => {
         for (let i = 0; i < 120; i++) {
             if (i % 12 === 0) { // 한 줄에 12개씩 단어를 작성
                 x = 50; // 1열의 위치(좌표값)로 복귀
-                y += 80; // 1행 내려줌
+                y += 70; // 1행 내려줌
             }
-            ctx.fillText(words[i], x + 25, y + -50); // 글씨를 쓴 뒤
+            ctx.fillText(words[i], x + 25, y - 40); // 글씨를 쓴 뒤
             x += 150; // 1열 옮겨줌
         }
     }
@@ -75,10 +84,13 @@ const Ingame = ({ acidlogic, socketIO }) => {
 
     return (
         <div>
-            <canvas ref={canvas} id="ingamecanvas" width="1800" height="800"></canvas>
+            <canvas ref={canvas} id="ingamecanvas" width="1800" height="700"></canvas>
+            <h1>남은 시간 : Timer</h1>
             <div style={{display:"flex", justifyContent:"center"}}> 
+                <h1 id="label_myscore">My Score : </h1>
                 <h1 id="myscore">{myscore}</h1>
                 <input type="text" id="wordinputfield" onKeyPress={SendWord} />
+                <h1 id="label_otherscore"> Other Score : </h1>
                 <h1 id="otherscore">{otherscore}</h1>            
             </div>
         </div>

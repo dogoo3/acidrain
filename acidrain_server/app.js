@@ -85,12 +85,23 @@ socket.on("connection", socket => {
     });
 
     socket.on("sendword", (word) => {
+        
         let isFind  =false;
         console.log(`GET WORD : ${word}`);
     
         console.log(socket.id)
         for(let i =0;i<userdata.room.length;i++){   //방 찾기
             if(socket.id==userdata.room[i].id_p1 ||socket.id==userdata.room[i].id_p2){
+
+
+                if(word=='게임종료'){   //테스트용 코드 단어 입력란에 '게임종료' 입력하면 '/'로 이동
+                    console.log('종료시작');
+                    socket.to(userdata.room[i].id_p1).emit("gotomain");
+                    socket.to(userdata.room[i].id_p2).emit("gotomain");
+            
+                    socket.emit("gotomain");
+                }
+
 
                 console.log('방찾음');
                 for(let j=0; j<userdata.room[i].words.length;j++){  //단어 찾기
@@ -120,18 +131,40 @@ socket.on("connection", socket => {
                         console.log(userdata.room[i].words)
                         socket.emit("increasescore");
                         //송신한 클라의 상대에 단어 업데이트
-                        
                         socket.to(userdata.room[i].id_p1).emit("setwords", userdata.room[i].words);
                         socket.to(userdata.room[i].id_p2).emit("setwords", userdata.room[i].words);
                         
                         socket.emit("setwords", userdata.room[i].words);    //송신한 클라에 단어 업데이트
-                        isFind=true;
+                        
+
+                        let k;
+                        for(k=0; k<userdata.room[i].words.length;k++)   //단어 리스트 검사
+                        {
+                            if(userdata.room[i].words[k]!=''){  
+                                break;  //단어가 ''가 아니면 break
+                            }
+                        }
+
+                        if(k>=userdata.room[i].words.length-1){ //모든 단어가 ''일 때 즉, 바로 위의 반복문에서 break가 걸리지 않았다면
+                            setTimeout(() =>{
+                                console.log('게임 종료!')
+                                socket.to(userdata.room[i].id_p1).emit("gotomain");
+                                socket.to(userdata.room[i].id_p2).emit("gotomain");
+                        
+                                socket.emit("gotomain");
+
+                            },4000);
+
+
+                        }
                         break;
                     }
                 }
 
             }
         }
+
+        
 
 
     })

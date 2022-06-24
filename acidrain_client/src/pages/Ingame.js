@@ -29,6 +29,12 @@ const Ingame = ({ acidlogic, socketIO }) => {
         
         //useEffect();
     })
+
+    socketIO.ON("gotomain", () => { //게임 종료시 '/'로 이동
+        console.log('gotomain')
+        window.location.href = "/";
+    })
+
     socketIO.ON("updateotherscore", (p_score) => { // 변경된 상대의 점수를 받았을 때
         otherscore=p_score;
         console.log(myscore+otherscore);

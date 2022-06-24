@@ -85,13 +85,11 @@ socket.on("connection", socket => {
     });
 
     socket.on("sendword", (word) => {
-        
-        let isFind  =false;
         console.log(`GET WORD : ${word}`);
     
         console.log(socket.id)
         for(let i =0;i<userdata.room.length;i++){   //방 찾기
-            if(socket.id==userdata.room[i].id_p1 ||socket.id==userdata.room[i].id_p2){
+            if(socket.id==userdata.room[i].id_p1 || socket.id==userdata.room[i].id_p2){
 
 
                 if(word=='게임종료'){   //테스트용 코드 단어 입력란에 '게임종료' 입력하면 '/'로 이동
@@ -106,7 +104,6 @@ socket.on("connection", socket => {
                 console.log('방찾음');
                 for(let j=0; j<userdata.room[i].words.length;j++){  //단어 찾기
                     if(userdata.room[i].words[j]==word){
-
                         if(socket.id==userdata.room[i].id_p1){  //p1이 단어를 입력했을 때
                             console.log('1');
                             userdata.room[i].score_p1++;
@@ -114,6 +111,10 @@ socket.on("connection", socket => {
                             
                             socket.to(userdata.room[i].id_p2).emit("updateotherscore", userdata.room[i].score_p1);  //p1의 변경된 점수를 '상대'의 점수로 업데이트
 
+                            // 단어 업데이트
+                            userdata.room[i].words[j]='';
+                            socket.emit("setwords", userdata.room[i].words);    //송신한 클라에 단어 업데이트
+                            socket.to(userdata.room[i].id_p2).emit("setwords", userdata.room[i].words);
                         }
                         if(socket.id==userdata.room[i].id_p2){  //p2가 단어를 입력했을 때
                             console.log('2');
@@ -121,31 +122,24 @@ socket.on("connection", socket => {
                             socket.emit("updatemyscore", userdata.room[i].score_p2) //p2의 변경된 점수를 '나'의 점수로 업데이트
                             
                             socket.to(userdata.room[i].id_p1).emit("updateotherscore", userdata.room[i].score_p2);  //p2의 변경된 점수를 '상대'의 점수로 업데이트
+                       
+                            // 단어 업데이트
+                            userdata.room[i].words[j]='';
+                            socket.emit("setwords", userdata.room[i].words);    //송신한 클라에 단어 업데이트
+                            socket.to(userdata.room[i].id_p1).emit("setwords", userdata.room[i].words);
                         }
-                        
-
-
-
                         console.log('단어찾음');
-                        userdata.room[i].words[j]='';
-                        console.log(userdata.room[i].words)
-                        socket.emit("increasescore");
-                        //송신한 클라의 상대에 단어 업데이트
-                        socket.to(userdata.room[i].id_p1).emit("setwords", userdata.room[i].words);
-                        socket.to(userdata.room[i].id_p2).emit("setwords", userdata.room[i].words);
-                        
-                        socket.emit("setwords", userdata.room[i].words);    //송신한 클라에 단어 업데이트
-                        
 
-                        let k;
-                        for(k=0; k<userdata.room[i].words.length;k++)   //단어 리스트 검사
+                        // for(k=0; k<userdata.room[i].words.length;k++)   //단어 리스트 검사
+                        // {
+                        //     if(userdata.room[i].words[k]!=''){  
+                        //         break;  //단어가 ''가 아니면 break
+                        //     }
+                        // }
+
+                        // 매번 120개의 단어리스트를 검사하면 performance가 너무 많이 먹으니, 이렇게 최적화 할게요
+                        if(userdata.room[i].score_p1 + userdata.room[i].score_p2 == userdata.room[i].words.length)
                         {
-                            if(userdata.room[i].words[k]!=''){  
-                                break;  //단어가 ''가 아니면 break
-                            }
-                        }
-
-                        if(k>=userdata.room[i].words.length-1){ //모든 단어가 ''일 때 즉, 바로 위의 반복문에서 break가 걸리지 않았다면
                             setTimeout(() =>{
                                 console.log('게임 종료!')
                                 socket.to(userdata.room[i].id_p1).emit("gotomain");
@@ -154,18 +148,14 @@ socket.on("connection", socket => {
                                 socket.emit("gotomain");
 
                             },4000);
-
-
                         }
+
+
                         break;
                     }
                 }
 
             }
         }
-
-        
-
-
     })
 });

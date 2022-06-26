@@ -42,7 +42,9 @@ function MakeRoom()
         id_p2: userdata.ingameList[1],  
         score_p1: 0,
         score_p2: 0,
-        timer: 120,
+        combo_p1: 0,
+        combo_p2: 0,
+        timer: 120,  //테스트용 10초, 120초로 바꿔야함 
         words: userdata.GetWords(),
     });
     // 소켓 ID를 찍어본 목적은 페이지에서 보내는 ID와 저장된 ID가 같은지 확인하기 위함
@@ -83,23 +85,15 @@ function RoomTimer(p1_id,p2_id,timer){
             socket.to(p2_id).emit("timer", timer);
             RoomTimer(p1_id,p2_id,timer);
         },1000)
-    }
-
+    }else{
+        console.log('게임 종료!')
+        socket.to(p1_id).emit("gotomain");
+        socket.to(p2_id).emit("gotomain");
     
-    
-    /*
-    while(timer>=0){
-        setTimeout(() =>{
-            console.log(timer)
-            socket.to(p1_id).emit("timer", timer);
-            socket.to(p2_id).emit("timer", timer);
-            timer--;
-
-        },1000);
+        socket.emit("gotomain");
 
     }
-    */
-    
+
 }
 
 socket.on("connection", socket => {
@@ -130,7 +124,7 @@ socket.on("connection", socket => {
         if(userdata.ingameList.length >= 2)
             MakeRoom(); // 방을 개설한다
     });
-
+    /*
     socket.on('a',()=>{
         for(let i =0;i<userdata.room.length;i++){
             if(socket.id==userdata.room[i].id_p1 || socket.id==userdata.room[i].id_p2){
@@ -141,6 +135,7 @@ socket.on("connection", socket => {
             }
         }
     })
+    */
 
     socket.on("sendword", (word) => {
         console.log(`GET WORD : ${word}`);
@@ -160,11 +155,14 @@ socket.on("connection", socket => {
 
 
                 console.log('방찾음');
-                for(let j=0; j<userdata.room[i].words.length;j++){  //단어 찾기
+                let j;
+                for(j=0; j<userdata.room[i].words.length;j++){  //단어 찾기
                     if(userdata.room[i].words[j]==word){
                         if(socket.id==userdata.room[i].id_p1){  //p1이 단어를 입력했을 때
-                            console.log('1');
-                            userdata.room[i].score_p1++;
+                            //console.log('1');
+                            userdata.room[i].combo_p1++;
+                            console.log(userdata.room[i].combo_p1);
+                            userdata.room[i].score_p1=userdata.room[i].score_p1+userdata.room[i].combo_p1;
                             socket.emit("updatemyscore", userdata.room[i].score_p1) //p1의 변경된 점수를 '나'의 점수로 업데이트
                             
                             socket.to(userdata.room[i].id_p2).emit("updateotherscore", userdata.room[i].score_p1);  //p1의 변경된 점수를 '상대'의 점수로 업데이트
@@ -175,8 +173,10 @@ socket.on("connection", socket => {
                             socket.to(userdata.room[i].id_p2).emit("setwords", userdata.room[i].words);
                         }
                         if(socket.id==userdata.room[i].id_p2){  //p2가 단어를 입력했을 때
-                            console.log('2');
-                            userdata.room[i].score_p2++;
+                            //console.log('2');
+                            userdata.room[i].combo_p2++;    //콤포 증가
+                            console.log(userdata.room[i].combo_p2);
+                            userdata.room[i].score_p2=userdata.room[i].score_p2+userdata.room[i].combo_p2;  //콤보만큼 점수 추가
                             socket.emit("updatemyscore", userdata.room[i].score_p2) //p2의 변경된 점수를 '나'의 점수로 업데이트
                             
                             socket.to(userdata.room[i].id_p1).emit("updateotherscore", userdata.room[i].score_p2);  //p2의 변경된 점수를 '상대'의 점수로 업데이트
@@ -186,7 +186,7 @@ socket.on("connection", socket => {
                             socket.emit("setwords", userdata.room[i].words);    //송신한 클라에 단어 업데이트
                             socket.to(userdata.room[i].id_p1).emit("setwords", userdata.room[i].words);
                         }
-                        console.log('단어찾음');
+                        //console.log('단어찾음');
 
                         // for(k=0; k<userdata.room[i].words.length;k++)   //단어 리스트 검사
                         // {
@@ -198,18 +198,23 @@ socket.on("connection", socket => {
                         // 매번 120개의 단어리스트를 검사하면 performance가 너무 많이 먹으니, 이렇게 최적화 할게요
                         if(userdata.room[i].score_p1 + userdata.room[i].score_p2 == userdata.room[i].words.length)
                         {
-                            setTimeout(() =>{
-                                console.log('게임 종료!')
-                                socket.to(userdata.room[i].id_p1).emit("gotomain");
-                                socket.to(userdata.room[i].id_p2).emit("gotomain");
+                            console.log('게임 종료!')
+                            socket.to(userdata.room[i].id_p1).emit("gotomain");
+                            socket.to(userdata.room[i].id_p2).emit("gotomain");
                         
-                                socket.emit("gotomain");
-
-                            },4000);
+                            socket.emit("gotomain");
                         }
 
 
                         break;
+                    }
+                }
+                if(j>=userdata.room[i].words.length-1){
+                    if(socket.id==userdata.room[i].id_p1){
+                        userdata.room[i].combo_p1=0;
+                    }
+                    if(socket.id==userdata.room[i].id_p2){
+                        userdata.room[i].combo_p2=0;
                     }
                 }
 

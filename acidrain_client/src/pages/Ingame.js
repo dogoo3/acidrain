@@ -34,8 +34,19 @@ const Ingame = ({ acidlogic, socketIO }) => {
 
     socketIO.ON("gotomain", () => { //게임 종료시 '/'로 이동
         console.log('gotomain')
+        if(myscore>otherscore){ //css 잘 모르겠어서 timer에 승패 적어둠, 바꿔야함
+            updatetimer('승리!');
+        }else if(myscore<otherscore){
+            updatetimer('패배');
+        }else{
+            updatetimer('무승부');
+        }
+        setTimeout(() =>{
+            window.location.href = "/";
+
+        },4000);
         // 나중에는 승리/패배 팝업창을 띄우고, 버튼으로 '/'으로 이동할 수 있게 구현 필요
-        window.location.href = "/";
+        
     })
 
     socketIO.ON("timer", (time) => { 

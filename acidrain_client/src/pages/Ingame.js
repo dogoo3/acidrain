@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-//import { socket } from '../../../acidrain_server/app';    //갑자기 이부분 에러난다길래 주석처리함
-import "../css/Ingame.css"
-let myscore = 0, otherscore = 0;   
+import "../css/Ingame.css";
+import Popup from "../service/resultpopup";
 
-
+let myscore = 0, otherscore = 0;
 
 const Ingame = ({ acidlogic, socketIO }) => {
     const [words, updateWords] = useState([]); // 단어 갱신시 hook을 통해 리렌더링
@@ -11,16 +10,42 @@ const Ingame = ({ acidlogic, socketIO }) => {
 
     const [timer, updatetimer] = useState(120);
 
-    
+    const [popupOpen_win, winPopupOpen] = useState(false);
+    const [popupOpen_lose, losePopupOpen] = useState(false);
+    const [popupOpen_draw, drawPopupOpen] = useState(false);
+
+    const openWinPopup = () => {
+        winPopupOpen(true);
+    }
+    const closeWinPopup = () => {
+        window.location.href = '/';
+        winPopupOpen(false);
+    }
+
+    const openLosePopup = () => {
+        losePopupOpen(true);
+    }
+    const closeLosePopup = () => {
+        window.location.href = '/';
+        losePopupOpen(false);
+    }
+
+    const openDrawPopup = () => {
+        drawPopupOpen(true);
+    }
+    const closeDrawPopup = () => {
+        window.location.href = '/';
+        drawPopupOpen(false);
+    }
+
     let ctx = null;
 
     // 소켓 ID는 서버에 한번만 주면 되기 때문에 logic.js에 플래그 변수를 만듬
-    if(!acidlogic.GetGameStartFlag())  
-    {
+    if (!acidlogic.GetGameStartFlag()) {
         socketIO.EMIT("ingame"); // 페이지 접속 시 소켓 ID를 서버로 전송
         acidlogic.SetGameStart(true); // 서버에 ID를 주면 플래그를 걸음
     }
-    
+
     socketIO.ON("setwords", (p_words) => { // 단어 리스트를 받았을 때
         console.log("setwords");
         updateWords(p_words); // 서버에서 받아온 단어리스트를 hook으로 넘김
@@ -34,48 +59,41 @@ const Ingame = ({ acidlogic, socketIO }) => {
 
     socketIO.ON("gotomain", () => { //게임 종료시 '/'로 이동
         console.log('gotomain')
-        if(myscore>otherscore){ //css 잘 모르겠어서 timer에 승패 적어둠, 바꿔야함
-            updatetimer('승리!');
-        }else if(myscore<otherscore){
-            updatetimer('패배');
-        }else{
-            updatetimer('무승부');
+        if (myscore > otherscore) { //css 잘 모르겠어서 timer에 승패 적어둠, 바꿔야함
+            openWinPopup();
+        } else if (myscore < otherscore) {
+            openLosePopup();
+        } else {
+            openDrawPopup();
         }
-        setTimeout(() =>{
-            window.location.href = "/";
-
-        },4000);
-        // 나중에는 승리/패배 팝업창을 띄우고, 버튼으로 '/'으로 이동할 수 있게 구현 필요
         
+        updatetimer('게임종료!');
     })
 
-    socketIO.ON("timer", (time) => { 
-        console.log('받아온 시간'+timer);
-        
-        updatetimer(time);
-        
+    socketIO.ON("timer", (time) => {
+        console.log('받아온 시간' + timer);
+
+        updatetimer(`남은 시간 : ${time}`);
+
     })
 
     socketIO.ON("updateotherscore", (p_score) => { // 변경된 상대의 점수를 받았을 때
         console.log("updateotherscore");
-        otherscore=p_score;
+        otherscore = p_score;
         //useEffect();
     })
 
 
     const SendWord = (event) => { // 엔터 키를 눌러서 접속하는 함수
-        if (event.key === "Enter")
-        {
+        if (event.key === "Enter") {
             let inputValue = document.getElementById("wordinputfield").value;
 
             // 아무것도 입력하지 않으면 서버로 보내지 않는다
             if (inputValue.length === 0) {
                 return;
             }
-            for(let i=0;i<inputValue.length;i++)
-            {
-                if(inputValue[i] === ' ')
-                {
+            for (let i = 0; i < inputValue.length; i++) {
+                if (inputValue[i] === ' ') {
                     document.getElementById("wordinputfield").value = ''; //단어 입력창 공백으로
                     return;
                 }
@@ -97,7 +115,7 @@ const Ingame = ({ acidlogic, socketIO }) => {
             x += 150; // 1열 옮겨줌
         }
     }
-    
+
     useEffect(() => {
         // 텍스트 작성을 위한 사전작업임
         const canvasEle = canvas.current;
@@ -110,20 +128,31 @@ const Ingame = ({ acidlogic, socketIO }) => {
         writeWords();
     });
 
-    console.log('현재 시간'+timer);
+    console.log('현재 시간' + timer);
     return (
         <div>
             <canvas ref={canvas} id="ingamecanvas" width="1800" height="700"></canvas>
-            <h1>남은 시간 : </h1>
-            <h1 id="timer">{timer}</h1>
-            <div style={{display:"flex", justifyContent:"center"}}> 
-                <h1 id="label_myscore">My Score : </h1>
-                <h1 id="myscore">{myscore}</h1>
-                <input type="text" id="wordinputfield" onKeyPress={SendWord} />
-                <h1 id="label_otherscore"> Other Score : </h1>
-                <h1 id="otherscore">{otherscore}</h1>            
+            <div style={{ display: "flex", justifyContent: "center" }}>
+                <h1 id="label_myscore">My Score : {myscore}</h1>
+                <h1 id="label_timer">{timer}</h1>
+                <h1 id="label_otherscore"> Other Score : {otherscore}</h1>
+
             </div>
+            <Popup
+                open={popupOpen_win} close={closeWinPopup} header="게임 결과">
+                축하합니다! 승리하셨습니다!
+            </Popup>
+            <Popup
+                open={popupOpen_lose} close={closeLosePopup} header="게임 결과">
+                아쉽습니다! 패배하셨습니다!
+            </Popup>
+            <Popup
+                open={popupOpen_draw} close={closeDrawPopup} header="게임 결과">
+                무승부입니다!
+            </Popup>
+            <input type="text" id="wordinputfield" onKeyPress={SendWord} />
         </div>
+
     );
 }
 export default Ingame;

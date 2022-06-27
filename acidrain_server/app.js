@@ -44,7 +44,7 @@ function MakeRoom()
         score_p2: 0,
         combo_p1: 0,
         combo_p2: 0,
-        timer: 120,  //테스트용 10초, 120초로 바꿔야함 
+        timer: 10,  //테스트용 10초, 120초로 바꿔야함 
         words: userdata.GetWords(),
     });
     // 소켓 ID를 찍어본 목적은 페이지에서 보내는 ID와 저장된 ID가 같은지 확인하기 위함

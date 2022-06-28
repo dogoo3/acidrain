@@ -2,10 +2,10 @@ import React from 'react';
 import "../css/InputMyLevel.css"
 
 const InputMyLevel = ({ acidlogic, socketIO }) => {
-    socketIO.ON("enter", () => {
+    socketIO.ONCE("enter", () => {
         window.location.href = "/waiting";
     });
-    socketIO.ON("gamestart", () => {
+    socketIO.ONCE("gamestart", () => {
         window.location.href = "/ingame";
     })
     const Join = () => { // 버튼을 클릭해서 접속하는 함수

@@ -27,5 +27,10 @@ export default class SocketIO {
     {
         this.socket_io.on(event, callback);
     }
+
+    ONCE(event, callback)
+    {
+        this.socket_io.once(event, callback);
+    }
   }
   

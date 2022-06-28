@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Waiting = ({ acidlogic, socketIO }) => {
-    socketIO.ON("gamestart", () => {
+    socketIO.ONCE("gamestart", () => {
         window.location.href = "/ingame";
     })
     return (
